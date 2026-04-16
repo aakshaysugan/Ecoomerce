@@ -40,6 +40,105 @@ Please generate a complete step-by-step solution with correct code and commands 
 
 8. Ensure the application works without manual input (no Scanner input), suitable for Docker and Jenkins execution.
 
+
+
+Student Performance Analytics System - DevOps Setup
+
+1. Git Commands
+
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/your-username/student-performance.git
+git push -u origin main
+
+2. Maven Build
+
+mvn clean compile or install
+
+3. Dockerfile
+
+# Stage 1: Build using Maven and Temurin JDK
+FROM maven:3.8.4-eclipse-temurin-17 AS build
+COPY . /app
+WORKDIR /app
+RUN mvn clean package
+
+# Stage 2: Runtime using lightweight Temurin JRE
+FROM eclipse-temurin:17-jre-alpine
+COPY --from=build /app/target/student-app-1.0-SNAPSHOT.jar student-app.jar
+ENTRYPOINT ["java", "-jar", "/student-app.jar"]
+
+
+4. Docker Commands
+
+docker build -t student-performance .
+docker run student-performance
+
+5. Jenkins Pipeline Script
+
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven'
+    }
+
+    stages {
+        stage('Clone') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-username/student-performance.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                bat 'mvn clean package'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                bat 'docker build -t student-performance .'
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                bat 'docker run student-performance'
+            }
+        }
+    }
+}
+
+6. Kubernetes Deployment (deployment.yaml)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: student-performance
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: student-performance
+  template:
+    metadata:
+      labels:
+        app: student-performance
+    spec:
+      containers:
+      - name: student-performance
+        image: your-dockerhub-username/student-performance    
+
+
+kubectl apply -f deployment.yaml
+kubectl get pods
+kubectl logs -l app=analytics-app
+
+
+
 9. Provide all commands in correct order and ensure there are no errors.
 
 Give everything in a clean, well-structured format suitable for creating a Word document submission.
